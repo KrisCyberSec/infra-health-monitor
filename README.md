@@ -1,17 +1,16 @@
-# Infrastructure Health & Anomaly Monitor Lab
+# Infrastructure Health & Anomaly Monitor
 
-AIOps-style lab project demonstrating a Grok Bot that monitors system health, detects anomalies, and generates actionable alerts/reports using simulated data.
+AIOps-style project demonstrating a Grok Bot that monitors system health, detects anomalies, and generates actionable alerts/reports using simulated data.
 
-This is designed as a portfolio piece for sysadmin / SRE / DevOps interviews. It shows proactive monitoring, noise reduction, scripting, and AI agent integration.
+It shows proactive monitoring, noise reduction, scripting, and AI agent integration.
 
-## Lab Goals
+## Goals
 - Build a persistent Grok Bot that acts as an infrastructure health monitor
-- Use simulated metrics so the lab is fully self-contained and documentable
+- Use simulated metrics so the project is fully self-contained
 - Generate clear alerts and daily reports
 - Maintain historical baselines in bot memory
-- Document everything for interviews or a GitHub portfolio
 
-## Lab Steps
+## Steps
 
 1. **Review the repository structure** (this repo)
    - `scripts/health_check.py` — generates simulated system metrics
@@ -45,12 +44,7 @@ This is designed as a portfolio piece for sysadmin / SRE / DevOps interviews. It
    - Integrate with Slack or email for alerts
 
 ## Why Simulated Data?
-Simulated metrics let you fully demonstrate the bot’s reasoning, anomaly detection, and reporting without needing live infrastructure. You can also inject known problems (high CPU, disk full, failed service) to show clear before/after examples in interviews.
-
-## Interview Talking Points
-- “I built an AI agent that proactively monitors infrastructure health using scheduled routines and persistent memory.”
-- “It compares current metrics against baselines and only escalates real anomalies.”
-- “The lab is fully documented in GitHub with sample scripts, data, and reports.”
+Simulated metrics let you fully demonstrate the bot’s reasoning, anomaly detection, and reporting without needing live infrastructure. You can also inject known problems (high CPU, disk full, failed service) to show clear before/after examples.
 
 ## Next Steps
 - Customize thresholds in the bot prompt or script
