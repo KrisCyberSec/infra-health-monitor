@@ -1,0 +1,28 @@
+{
+  "checks": [
+    {
+      "timestamp": "2026-10-31T18:00:00Z",
+      "host": "lab-server-01",
+      "role": "web",
+      "cpu_percent": 32,
+      "memory_percent": 58,
+      "disk_percent": 95,
+      "services": {"nginx": "running", "sshd": "running", "postgres": "not-installed"},
+      "failed_logins_last_hour": 2,
+      "anomaly_injected": "high_disk",
+      "note": "Simulated metrics for lab demonstration"
+    },
+    {
+      "timestamp": "2026-10-31T18:00:00Z",
+      "host": "lab-db-01",
+      "role": "database",
+      "cpu_percent": 41,
+      "memory_percent": 67,
+      "disk_percent": 62,
+      "services": {"nginx": "not-installed", "sshd": "running", "postgres": "failed"},
+      "failed_logins_last_hour": 1,
+      "anomaly_injected": "service_failed",
+      "note": "Simulated metrics for lab demonstration"
+    }
+  ]
+}

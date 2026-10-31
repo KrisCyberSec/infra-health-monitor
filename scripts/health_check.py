@@ -1,48 +1,80 @@
 #!/usr/bin/env python3
 """
-Simple simulated health check script for the Infra Health Monitor lab.
-Outputs JSON metrics. Can be extended to call real system commands later.
+Simulated health check script for the Infra Health Monitor lab.
+Supports multiple hosts and injects realistic anomalies for documentation.
 """
 
 import json
 import random
 from datetime import datetime
 
-def generate_metrics():
-    # Simulate mostly healthy system with occasional anomalies
-    cpu = random.randint(10, 45)
-    memory = random.randint(30, 70)
-    disk = random.randint(40, 75)
-    
-    # Occasionally inject an anomaly for demo purposes
-    if random.random() < 0.25:
-        anomaly = random.choice(["cpu", "disk", "service"])
-        if anomaly == "cpu":
-            cpu = random.randint(88, 98)
-        elif anomaly == "disk":
-            disk = random.randint(92, 99)
-        # service failure is handled below
-    else:
-        anomaly = None
+HOSTS = [
+    {
+        "name": "lab-server-01",
+        "role": "web",
+        "baseline": {"cpu": (15, 50), "memory": (30, 70), "disk": (40, 75)}
+    },
+    {
+        "name": "lab-db-01",
+        "role": "database",
+        "baseline": {"cpu": (20, 60), "memory": (40, 80), "disk": (50, 80)}
+    }
+]
+
+def generate_metrics(host_config, force_anomaly=None):
+    name = host_config["name"]
+    baseline = host_config["baseline"]
+
+    cpu = random.randint(*baseline["cpu"])
+    memory = random.randint(*baseline["memory"])
+    disk = random.randint(*baseline["disk"])
 
     services = {
-        "nginx": "running",
+        "nginx": "running" if host_config["role"] == "web" else "not-installed",
         "sshd": "running",
-        "postgres": "running"
+        "postgres": "running" if host_config["role"] == "database" else "not-installed"
     }
-    if anomaly == "service" or random.random() < 0.1:
-        services["postgres"] = "failed"
+
+    anomaly = force_anomaly
+    if not anomaly and random.random() < 0.3:
+        anomaly = random.choice(["high_cpu", "high_disk", "service_failed", "login_spike"])
+
+    if anomaly == "high_cpu":
+        cpu = random.randint(88, 97)
+    elif anomaly == "high_disk":
+        disk = random.randint(91, 98)
+    elif anomaly == "service_failed":
+        key = "postgres" if host_config["role"] == "database" else "nginx"
+        services[key] = "failed"
+    elif anomaly == "login_spike":
+        failed_logins = random.randint(12, 25)
+    else:
+        failed_logins = random.randint(0, 4)
+
+    if anomaly != "login_spike":
+        failed_logins = random.randint(0, 4)
 
     return {
         "timestamp": datetime.utcnow().isoformat() + "Z",
-        "host": "lab-server-01",
+        "host": name,
+        "role": host_config["role"],
         "cpu_percent": cpu,
         "memory_percent": memory,
         "disk_percent": disk,
         "services": services,
-        "failed_logins_last_hour": random.randint(0, 3),
+        "failed_logins_last_hour": failed_logins,
+        "anomaly_injected": anomaly,
         "note": "Simulated metrics for lab demonstration"
     }
 
+def main():
+    results = []
+    for host in HOSTS:
+        # Force one interesting anomaly on the first host for demos
+        force = "high_disk" if host["name"] == "lab-server-01" else None
+        results.append(generate_metrics(host, force_anomaly=force))
+
+    print(json.dumps({"checks": results}, indent=2))
+
 if __name__ == "__main__":
-    print(json.dumps(generate_metrics(), indent=2))
+    main()
