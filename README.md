@@ -1,4 +1,4 @@
-# Infrastructure Health & Anomaly Monitor
+# Infrastructure Health & Anomaly Monitor Lab
 
 AIOps-style project demonstrating a Grok Bot that monitors system health, detects anomalies, and generates actionable alerts/reports using simulated data.
 
