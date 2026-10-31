@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-10-31T17:30:00Z",
+  "host": "lab-server-01",
+  "cpu_percent": 28,
+  "memory_percent": 52,
+  "disk_percent": 94,
+  "services": {
+    "nginx": "running",
+    "sshd": "running",
+    "postgres": "running"
+  },
+  "failed_logins_last_hour": 1,
+  "note": "Simulated high-disk anomaly"
+}
