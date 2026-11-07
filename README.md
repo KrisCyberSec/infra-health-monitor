@@ -70,6 +70,66 @@ Example output from one run (values change every run):
 
 Then give the JSON to the bot using the instructions in [`bot-prompt.md`](bot-prompt.md).
 
+## How to run `scripts/collect_metrics.py`
+
+From the repo root. The script prints one JSON document on stdout and takes about one second, because the CPU sample uses `psutil.cpu_percent(interval=1)`.
+
+Service status is one of `running`, `failed`, `inactive` (installed but stopped), `not-installed`, or `unknown` (no `systemctl`, such as on macOS). `failed_logins_last_hour` is `null` off Linux or when the logs can't be read, and `0` means the logs were read and had no matching line.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python scripts/collect_metrics.py
+```
+
+If `python3 -m venv` on the droplet says the `venv` module is missing:
+
+```bash
+sudo apt-get install -y python3-venv
+```
+
+If `pip` tries to compile `psutil` and fails, install `build-essential` and `python3-dev`, then run the pip command again.
+
+### How to test
+
+From the repo root, with the venv activated. This checks the shape. It does not check the numeric values.
+
+```bash
+python - <<'PY'
+import json, subprocess, sys
+raw = subprocess.check_output([sys.executable, "scripts/collect_metrics.py"])
+data = json.loads(raw)
+check = data["checks"][0]
+assert list(check) == [
+    "timestamp", "host", "role", "cpu_percent", "memory_percent",
+    "disk_percent", "services", "failed_logins_last_hour",
+    "anomaly_injected", "note",
+]
+assert check["timestamp"].endswith("Z")
+assert check["role"] == "unknown"
+assert check["note"] == "Real metrics"
+assert check["anomaly_injected"] is None
+for key in ("cpu_percent", "memory_percent", "disk_percent"):
+    assert isinstance(check[key], int)
+assert list(check["services"]) == ["sshd", "nginx", "apache2"]
+if sys.platform == "darwin":
+    assert check["failed_logins_last_hour"] is None
+    assert set(check["services"].values()) == {"unknown"}
+print("shape ok")
+PY
+```
+
+On the droplet, as root, compare the login count with the journal. The two numbers should match when the script used the journal. `null` means the logs were not readable. `0` means they were readable and had no matching line.
+
+```bash
+sudo python scripts/collect_metrics.py
+sudo journalctl -t sshd --since "1 hour ago" --no-pager -o cat \
+  | grep -Eic 'Failed password for |Failed keyboard-interactive' || true
+```
+
+A one-line `collect_metrics: percent metric failed` on stderr means that percent is JSON `null` because the read failed.
+
 ## Example results
 
 - [`examples/bot-analysis-multi-host.md`](examples/bot-analysis-multi-host.md): the bot's analysis of the multi-host sample. It ranks a failed Postgres service as critical and a 95% full disk as high, suggests next commands (`systemctl status`, `journalctl`, `du`), and recommends the fix order.
@@ -82,14 +142,14 @@ Simulated metrics let me inject known problems (full disk, failed service, login
 
 ## Limitations
 
-- All metrics are simulated. Nothing is collected from a real machine.
+- `health_check.py` is simulated. `collect_metrics.py` reads real metrics, but nothing applies thresholds to them yet.
 - Alert thresholds live in the bot prompt, not in code or a config file.
 - The script does not store history, run on a schedule, or send notifications.
 - The bot is run by hand against the script's output.
 
 ## Roadmap
 
-- [ ] Collect real CPU, memory, and disk metrics from my own machine (`psutil`)
+- [x] Collect real CPU, memory, and disk metrics from my own machine (`psutil`)
 - [ ] Move thresholds into a config file
 - [ ] Schedule runs with cron or a systemd timer
 - [ ] Monitor more than two hosts
