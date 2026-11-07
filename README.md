@@ -150,7 +150,9 @@ sudo journalctl -t sshd --since "1 hour ago" --no-pager -o cat \
 - A single reading over a limit alerts immediately. There is no "sustained for N runs" rule yet, so a brief spike can trigger an alert.
 - There are no notifications. You read the report or act on the exit code.
 - Failed-login counting reads sshd logs and works on Linux only. The service list in the collector is fixed to `sshd`, `nginx` and `apache2`.
-- Simulated mode exists for demos and tests. Its numbers are random.
+- Simulated mode exists for demos and tests. Its numbers are random, with one exception: `--simulate` always injects a full disk on `lab-server-01`, so that mode always exits 2 (CRITICAL). `lab-db-01` is the host whose status changes from run to run. To see exit codes 0 or 1, use real mode or the unit tests.
+
+Last verified 2026-11-07 on a Mac: all 14 tests passed, and four simulated runs all exited 2, with `lab-server-01` critical on disk each time and `lab-db-01` varying between CRITICAL, OK and WARNING.
 
 ## Roadmap
 
