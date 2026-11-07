@@ -6,7 +6,7 @@ Supports multiple hosts and injects realistic anomalies for documentation.
 
 import json
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 
 HOSTS = [
     {
@@ -55,7 +55,7 @@ def generate_metrics(host_config, force_anomaly=None):
         failed_logins = random.randint(0, 4)
 
     return {
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "host": name,
         "role": host_config["role"],
         "cpu_percent": cpu,
