@@ -1,0 +1,6 @@
+{
+  "cpu_percent": {"warn": 85, "critical": 95},
+  "memory_percent": {"warn": 85, "critical": 95},
+  "disk_percent": {"warn": 85, "critical": 90},
+  "failed_logins_last_hour": {"warn": 10, "critical": 25}
+}
